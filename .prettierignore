@@ -1,0 +1,12 @@
+node_modules
+logs
+run
+coverage
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.sqlite
+database/
+*.log

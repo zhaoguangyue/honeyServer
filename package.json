@@ -1,0 +1,52 @@
+{
+  "name": "honeyServer",
+  "version": "1.0.0",
+  "description": "mvp版本",
+  "private": true,
+  "egg": {
+    "declarations": true
+  },
+  "dependencies": {
+    "egg": "^3.17.5",
+    "egg-scripts": "2",
+    "egg-sequelize": "^6.0.0",
+    "mqtt": "^5.14.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "egg-bin": "6",
+    "egg-mock": "5",
+    "eslint": "8",
+    "eslint-config-egg": "13",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "sequelize-cli": "^6.6.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "egg-scripts start --daemon --title=egg-server-honeyServer",
+    "stop": "egg-scripts stop --title=egg-server-honeyServer",
+    "dev": "egg-bin dev",
+    "db:migrate": "sequelize db:migrate",
+    "db:migrate:undo": "sequelize db:migrate:undo",
+    "db:migrate:undo:all": "sequelize db:migrate:undo:all",
+    "db:seed": "sequelize db:seed:all",
+    "db:seed:undo": "sequelize db:seed:undo:all",
+    "test": "npm run lint -- --fix && npm run test:local",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run cov"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "MIT"
+}
