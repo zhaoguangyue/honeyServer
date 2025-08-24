@@ -13,7 +13,8 @@
     "egg-sequelize": "^6.0.0",
     "mqtt": "^5.14.0",
     "sequelize": "^6.37.7",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "sequelize-cli": "^6.6.3"
   },
   "devDependencies": {
     "egg-bin": "6",
@@ -21,8 +22,7 @@
     "eslint": "8",
     "eslint-config-egg": "13",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.6.2",
-    "sequelize-cli": "^6.6.3"
+    "prettier": "^3.6.2"
   },
   "engines": {
     "node": ">=18.0.0"
