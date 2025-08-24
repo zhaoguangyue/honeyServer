@@ -7,7 +7,6 @@ module.exports = () => {
   config.sequelize = {
     dialect: 'sqlite',
     storage: path.join(__dirname, '../database/app.sqlite'),
-    // timezone: '+08:00',
     define: {
       freezeTableName: true,
       timestamps: false,

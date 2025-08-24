@@ -17,11 +17,10 @@ class MetricsService extends Service {
       const { topic, payload } = data;
       const message = payload.toString();
       this.ctx.logger.info(`处理MQTT消息: [${topic}]`);
-
       try {
-        const { type, ...payload } = JSON.parse(message);
         // 使用 this.ctx 来调用其他服务或模型
         if (typeof topic === 'string' && topic.startsWith('honeySleepSubscribeSensor')) {
+          const { type, ...payload } = JSON.parse(message);
           await this.validateModel(type);
           await this.insertOne(type, payload);
         }
