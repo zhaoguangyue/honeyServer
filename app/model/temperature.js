@@ -35,17 +35,30 @@ module.exports = (app) => {
         allowNull: false,
         comment: '数据时间戳( 精确到秒 )',
       },
-      body_temp: {
+      // 当前温度（MVP 用）
+      current_temp: {
         type: FLOAT,
         allowNull: true,
-        comment: '用户体温( ℃ )',
+        comment: '当前水毯温度( ℃ )',
+      },
+      // 夜间温度（预留）
+      night_temp: {
+        type: FLOAT,
+        allowNull: true,
+        comment: '夜间温度( ℃ ) 预留',
+      },
+      // 黎明温度（预留）
+      dawn_temp: {
+        type: FLOAT,
+        allowNull: true,
+        comment: '黎明温度( ℃ ) 预留',
       },
     },
     {
       tableName: 'temperature',
       freezeTableName: true,
       timestamps: false,
-      comment: '体温数据表',
+      comment: '水毯设备温度设置表',
       indexes: [{ fields: ['device_id', 'timestamp'] }],
     }
   );

@@ -35,11 +35,11 @@ module.exports = (app) => {
         allowNull: false,
         comment: '数据时间戳( 精确到秒 )',
       },
-      hr: {
+      data: {
         type: INTEGER,
         allowNull: true,
-        validate: { min: 31, max: 199 },
-        comment: '实时心率( 次/分钟 ), 范围(30,200)',
+        validate: { min: 0, max: 1000 },
+        comment: '实时心率( 次/分钟 ), 范围(0,1000)',
       },
     },
     {

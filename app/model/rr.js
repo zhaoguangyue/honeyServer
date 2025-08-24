@@ -35,7 +35,7 @@ module.exports = (app) => {
         allowNull: false,
         comment: '数据时间戳( 精确到秒 )',
       },
-      rr: {
+      data: {
         type: INTEGER,
         allowNull: true,
         validate: { min: 6, max: 39 },

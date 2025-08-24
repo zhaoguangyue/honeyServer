@@ -63,13 +63,13 @@ class MetricsController extends Controller {
    * @param {string} order 排序方式
    * @returns {Promise<{ok: boolean, data: Array<object>}>}
    */
-  async queryRange() {
+  async queryMetricsRange() {
     const { ctx } = this;
-    const { model, device_id, start, end, limit, order } = ctx.request.body || {};
+    const { type, device_id, start, end, limit, order } = ctx.request.body || {};
 
-    if (!this.validateModel(model)) return;
+    if (!this.validateModel(type)) return;
 
-    const data = await ctx.service.metrics.queryRange(model, {
+    const data = await ctx.service.metrics.queryMetricsRange(type, {
       device_id,
       start,
       end,

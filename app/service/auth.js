@@ -6,17 +6,12 @@ const crypto = require('crypto');
 class AuthService extends Service {
   /**
    * 生成登录令牌
-   * @param {string} userId 用户ID
+   * 生成32位随机字符串作为令牌
    * @return {string} 登录令牌字符串
    */
-  generateToken(userId) {
-    const { app } = this;
-    const timestamp = Date.now();
-    const randomStr = crypto.randomBytes(16).toString('hex');
-    return crypto
-      .createHmac('sha256', app.config.keys)
-      .update(`${userId}-${timestamp}-${randomStr}`)
-      .digest('hex');
+  generateToken() {
+    // MVP：简单的随机字符串，长度32
+    return crypto.randomBytes(16).toString('hex');
   }
 
   /**
@@ -26,7 +21,7 @@ class AuthService extends Service {
    * @return {Promise<{ok: boolean, data?: object, error?: string}>>} 登录结果
    */
   async login(email, password) {
-    const { ctx, app } = this;
+    const { ctx } = this;
     const { User } = ctx.model;
 
     // 1. 查找用户
@@ -40,13 +35,8 @@ class AuthService extends Service {
       return { ok: false, error: '账号已被禁用' };
     }
 
-    // 3. 验证密码
-    const passwordHash = crypto
-      .createHmac('sha256', app.config.keys)
-      .update(password)
-      .digest('hex');
-
-    if (passwordHash !== user.password_hash) {
+    // 3. 验证密码（MVP：明文对比）
+    if (password !== user.password_hash) {
       return { ok: false, error: '密码错误' };
     }
 

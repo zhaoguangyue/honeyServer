@@ -21,14 +21,8 @@ class UserController extends Controller {
     }
     ctx.body = result;
   }
-  async index() {
-    const { ctx } = this;
-    const { offset = 0, limit = 20 } = ctx.query;
-    const data = await ctx.service.user.list({ offset: Number(offset), limit: Number(limit) });
-    ctx.body = { ok: true, data };
-  }
 
-  async show() {
+  async get() {
     const { ctx } = this;
     const { id } = ctx.request.body || {};
     const data = await ctx.service.user.getById(id);

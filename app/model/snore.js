@@ -35,7 +35,7 @@ module.exports = (app) => {
         allowNull: false,
         comment: '数据时间戳( 精确到秒 )',
       },
-      snore: {
+      data: {
         type: FLOAT,
         allowNull: true,
         comment: '打鼾强度( 0-1.0, 0=无鼾声 )',

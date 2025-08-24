@@ -17,6 +17,17 @@ module.exports = (app) => {
     app.emit('mqtt-message', data);
   });
 
+  // 等待应用启动后，获取上下文并注册处理器
+  app.beforeStart(async () => {
+    // 创建一个匿名上下文来初始化服务
+    const ctx = app.createAnonymousContext();
+    // 获取我们刚写的服务实例
+    const metricsService = ctx.service.metrics;
+    // 调用方法注册监听器！
+    await metricsService.registerHandlers();
+    app.coreLogger.info('[app] MQTT消息处理器注册完成');
+  });
+
   // 提供发布代理
   app.mqttPublish = (topic, message, options) => {
     app.messenger.sendToAgent('mqtt-publish', { topic, message, options });

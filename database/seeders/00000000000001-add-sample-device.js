@@ -10,7 +10,7 @@ module.exports = {
         is_online: false,
         power_status: false,
         created_at: now,
-        user_id: null,
+        user_id: 'user-0001',
       },
     ]);
   },

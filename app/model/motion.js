@@ -35,7 +35,7 @@ module.exports = (app) => {
         allowNull: false,
         comment: '数据时间戳( 精确到秒 )',
       },
-      motion: {
+      data: {
         type: FLOAT,
         allowNull: true,
         comment: '体动强度( 0-1.0, 0=静止 )',

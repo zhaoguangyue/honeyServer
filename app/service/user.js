@@ -25,12 +25,20 @@ class UserService extends Service {
    * @param {string} id
    */
   async getById(id) {
-    const { User } = this.ctx.model;
-    return await User.findByPk(id);
+    const { User, Device } = this.ctx.model;
+    return await User.findByPk(id, {
+      include: [
+        {
+          model: Device,
+          as: 'devices',
+        },
+      ],
+    });
   }
 
   /**
    * 新建用户
+   * mvp阶段，密码明文存储
    * @param {object} payload
    */
   async create(payload) {

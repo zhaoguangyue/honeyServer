@@ -13,8 +13,15 @@ class DeviceService extends Service {
    * @param {string} id 设备ID
    */
   async getById(id) {
-    const { Device } = this.ctx.model;
-    return await Device.findByPk(id);
+    const { Device, User } = this.ctx.model;
+    return await Device.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+        },
+      ],
+    });
   }
 
   /**

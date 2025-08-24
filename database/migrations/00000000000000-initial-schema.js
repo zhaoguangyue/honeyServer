@@ -25,7 +25,16 @@ module.exports = {
       is_online: { type: BOOLEAN, allowNull: false, defaultValue: false },
       power_status: { type: BOOLEAN, allowNull: false, defaultValue: false },
       created_at: { type: DATE, allowNull: false, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-      user_id: { type: STRING(64), allowNull: true, references: { model: 'user', key: 'id' } },
+      user_id: {
+        type: STRING(64),
+        allowNull: true,
+        references: {
+          model: 'user',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
     });
 
     // hr

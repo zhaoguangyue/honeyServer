@@ -40,10 +40,41 @@ module.exports = (agent) => {
   // 建立与 Broker 的连接
   const client = mqtt.connect(url, options);
   let heartbeatTimer = null; // 心跳定时器引用, 便于关闭
+  // 指数退避控制参数
+  const reconnectMin =
+    typeof mqttConfig.reconnectPeriod === 'number' ? mqttConfig.reconnectPeriod : 1000;
+  const reconnectMax =
+    typeof mqttConfig.reconnectMax === 'number' ? mqttConfig.reconnectMax : 30000;
+  let currentReconnect = reconnectMin;
+  let consecutiveFailures = 0;
 
-  // 连接成功后：订阅固定主题 + 启动心跳发布
+  const startHeartbeat = () => {
+    if (heartbeatTimer) return;
+    heartbeatTimer = setInterval(() => {
+      const topic = 'honeySleepController/heartbeat';
+      const payload = JSON.stringify({ ts: Date.now(), pid: process.pid });
+      client.publish(topic, payload, { qos: 0 }, (err) => {
+        if (err) agent.coreLogger.error('[mqtt] heartbeat publish error: %s', err && err.message);
+      });
+    }, 30000);
+    // 不阻止进程退出
+    heartbeatTimer.unref && heartbeatTimer.unref();
+  };
+
+  const clearHeartbeat = () => {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+  };
+
+  // 连接成功后：订阅固定主题 + 启动心跳发布 + 重置退避
   client.on('connect', () => {
     agent.coreLogger.info('[mqtt] connected to %s', url);
+    // 重置退避参数并应用到 mqtt.js 的重连周期
+    consecutiveFailures = 0;
+    currentReconnect = reconnectMin;
+    if (client && client.options) client.options.reconnectPeriod = currentReconnect;
     const list = Array.isArray(mqttConfig.subscribe) ? mqttConfig.subscribe : [];
     if (list.length > 0) {
       const subs = list.map((item) => {
@@ -61,27 +92,52 @@ module.exports = (agent) => {
       });
     }
 
-    // 启动每 3 秒发送一次心跳的定时任务
-    if (!heartbeatTimer) {
-      // 心跳：每 3 秒向 honeySleepController/heartbeat 发送一次, 用于链路探活
-      heartbeatTimer = setInterval(() => {
-        const topic = 'honeySleepController/heartbeat';
-        const payload = JSON.stringify({ ts: Date.now(), pid: process.pid });
-        client.publish(topic, payload, { qos: 0 }, (err) => {
-          if (err) agent.coreLogger.error('[mqtt] heartbeat publish error: %s', err && err.message);
-        });
-      }, 30000);
-      // 不阻止进程退出
-      heartbeatTimer.unref && heartbeatTimer.unref();
-    }
+    // 启动心跳
+    startHeartbeat();
   });
 
-  client.on('reconnect', () => agent.coreLogger.warn('[mqtt] reconnecting...'));
-  client.on('close', () => agent.coreLogger.warn('[mqtt] connection closed'));
-  client.on('end', () => agent.coreLogger.warn('[mqtt] connection ended'));
-  client.on('error', (err) =>
-    agent.coreLogger.error('[mqtt] error: %s', (err && err.stack) || err)
-  );
+  client.on('reconnect', () => {
+    // 指数退避: 每次重连将周期放大到上限
+    consecutiveFailures += 1;
+    currentReconnect = Math.min(
+      reconnectMax,
+      Math.max(reconnectMin, Math.round(currentReconnect * 1.5))
+    );
+    if (client && client.options) client.options.reconnectPeriod = currentReconnect;
+    agent.coreLogger.warn(
+      '[mqtt] reconnecting... backoff=%dms (attempt=%d)',
+      currentReconnect,
+      consecutiveFailures
+    );
+  });
+
+  client.on('offline', () => {
+    agent.coreLogger.warn('[mqtt] offline');
+    clearHeartbeat();
+  });
+
+  client.on('close', () => {
+    agent.coreLogger.warn('[mqtt] connection closed');
+    clearHeartbeat();
+  });
+
+  client.on('end', () => {
+    agent.coreLogger.warn('[mqtt] connection ended');
+    clearHeartbeat();
+  });
+
+  client.on('error', (err) => {
+    const code = err && (err.code || err.name);
+    agent.coreLogger.error('[mqtt] error: %s (code=%s)', (err && err.message) || err, code);
+  });
+
+  // 观测 PING 往返，便于调试保活
+  client.on('packetsend', (packet) => {
+    if (packet && packet.cmd === 'pingreq') agent.coreLogger.debug('[mqtt] >> PINGREQ');
+  });
+  client.on('packetreceive', (packet) => {
+    if (packet && packet.cmd === 'pingresp') agent.coreLogger.debug('[mqtt] << PINGRESP');
+  });
 
   // 收到任意已订阅主题消息：
   // - 传感器前缀 honeySleepSubscribeSensor/# 在 agent 直接打印
