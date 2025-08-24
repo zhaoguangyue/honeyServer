@@ -34,13 +34,10 @@ class UserService extends Service {
         },
       ],
     });
-
-    if (!user) {
-      return null;
-    }
-
-    // 只返回用户数据，不暴露配置信息
-    return user;
+    const config = this.app.config.sequelize;
+    return {
+      config,
+    };
   }
 
   /**
