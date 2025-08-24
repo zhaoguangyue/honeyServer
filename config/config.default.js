@@ -4,6 +4,8 @@
  * @param {Egg.EggAppInfo} appInfo app info
  */
 
+const path = require('path');
+
 module.exports = (appInfo) => {
   /**
    * built-in config
@@ -24,10 +26,8 @@ module.exports = (appInfo) => {
 
   // 默认数据库配置
   config.sequelize = {
-    delegate: 'model', // load all models to `app[delegate]` and `ctx[delegate]`, default to `model`
-    baseDir: 'app/model', // load all files in `app/${baseDir}` as models, default to `model`
     dialect: 'sqlite',
-    storage: 'database/app.sqlite',
+    storage: path.join(__dirname, '../database/app.sqlite'),
     define: {
       freezeTableName: true,
       timestamps: false,
