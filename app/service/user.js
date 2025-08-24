@@ -26,7 +26,7 @@ class UserService extends Service {
    */
   async getById(id) {
     const { User, Device } = this.ctx.model;
-    const user = await User.findByPk(id, {
+    return await User.findByPk(id, {
       include: [
         {
           model: Device,
@@ -34,10 +34,6 @@ class UserService extends Service {
         },
       ],
     });
-    const config = this.app.config.sequelize;
-    return {
-      config,
-    };
   }
 
   /**
