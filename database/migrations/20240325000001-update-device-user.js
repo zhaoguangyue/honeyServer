@@ -2,28 +2,37 @@
 
 module.exports = {
   async up(queryInterface) {
-    // 更新 device 表中指定设备的 user_id
-    await queryInterface.bulkUpdate(
-      'device',
+    const now = new Date();
+
+    // 创建示例用户
+    await queryInterface.bulkInsert('user', [
       {
-        user_id: 'user-0001',
+        id: 'user-0001',
+        name: 'honey',
+        email: 'honeysleep@honey.com',
+        password_hash: 'asdf1234',
+        phone: '18888888888',
+        is_active: true,
+        created_at: now,
       },
+    ]);
+
+    // 创建示例设备
+    await queryInterface.bulkInsert('device', [
       {
         id: 'device-0001',
-      }
-    );
+        name: '智能水毯',
+        is_online: false,
+        power_status: false,
+        created_at: now,
+        user_id: 'user-0001',
+      },
+    ]);
   },
 
   async down(queryInterface) {
-    // 回滚操作：将该设备的 user_id 设置为 null
-    await queryInterface.bulkUpdate(
-      'device',
-      {
-        user_id: null,
-      },
-      {
-        id: 'device-0001',
-      }
-    );
+    // 回滚操作：按照相反顺序删除数据
+    await queryInterface.bulkDelete('device', { id: 'device-0001' });
+    await queryInterface.bulkDelete('user', { id: 'user-0001' });
   },
 };
