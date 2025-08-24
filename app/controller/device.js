@@ -11,7 +11,7 @@ class DeviceController extends Controller {
   }
 
   // 根据 id 查询设备
-  async show() {
+  async get() {
     const { ctx } = this;
     const { id } = ctx.request.body || {};
     const data = await ctx.service.device.getById(id);

@@ -8,6 +8,12 @@ const OPERATE_TYPE = {
 };
 
 class DeviceService extends Service {
+  async list(opts = {}) {
+    const { offset = 0, limit = 20 } = opts;
+    const { Device } = this.ctx.model;
+    return await Device.findAll({ offset, limit });
+  }
+
   /**
    * 获取详情
    * @param {string} id 设备ID

@@ -27,7 +27,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-honeyServer",
+    "start": "egg-scripts start --daemon --title=egg-server-honeyServer --env=production",
     "stop": "egg-scripts stop --title=egg-server-honeyServer",
     "dev": "egg-bin dev",
     "db:migrate": "sequelize db:migrate",

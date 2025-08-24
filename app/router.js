@@ -17,11 +17,13 @@ module.exports = (app) => {
 
   // Devices CRUD (需要登录)
   router.get('/api/devices/list', controller.device.index);
-  router.post('/api/devices/get', controller.device.show);
+  router.post('/api/devices/get', controller.device.get);
   router.post('/api/devices/create', controller.device.create);
   router.post('/api/devices/update', controller.device.update);
   router.post('/api/devices/delete', controller.device.destroy);
 
+  // 获取设备状态
+  router.post('/api/devices/get-status', controller.device.get);
   // 对设备进行开关控制
   router.post('/api/devices/set-power', controller.device.setPower);
   // 对设备进行温度控制
