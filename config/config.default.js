@@ -26,6 +26,7 @@ module.exports = (appInfo) => {
 
   // 默认数据库配置
   config.sequelize = {
+    delegate: 'model', // load all models to `app[delegate]` and `ctx[delegate]`, default to `model`
     dialect: 'sqlite',
     storage: path.join(__dirname, '../database/app.sqlite'),
     define: {
