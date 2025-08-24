@@ -26,7 +26,7 @@ class UserService extends Service {
    */
   async getById(id) {
     const { User, Device } = this.ctx.model;
-    return await User.findByPk(id, {
+    const user = await User.findByPk(id, {
       include: [
         {
           model: Device,
@@ -34,6 +34,13 @@ class UserService extends Service {
         },
       ],
     });
+
+    if (!user) {
+      return null;
+    }
+
+    // 只返回用户数据，不暴露配置信息
+    return user;
   }
 
   /**
