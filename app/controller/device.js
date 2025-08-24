@@ -20,6 +20,7 @@ class DeviceController extends Controller {
       ctx.body = { ok: false, error: 'Not Found' };
       return;
     }
+    ctx.status = 200;
     ctx.body = { ok: true, data };
   }
 
@@ -43,6 +44,7 @@ class DeviceController extends Controller {
       ctx.body = { ok: false, error: 'Not Found' };
       return;
     }
+    ctx.status = 200;
     ctx.body = { ok: true, data };
   }
 
@@ -58,38 +60,52 @@ class DeviceController extends Controller {
   // PUT /api/devices/power  body: { device_id: string, on: boolean }
   async setPower() {
     const { ctx } = this;
-    const { device_id, on } = ctx.request.body || {};
-    if (!device_id || on === undefined) {
+    const { device_id, power_status } = ctx.request.body || {};
+    if (!device_id || power_status === undefined) {
       ctx.status = 400;
       ctx.body = { ok: false, error: 'Missing required field: device_id or on' };
       return;
     }
-    const updated = await ctx.service.device.setPower(String(device_id), on === '1');
+    const updated = await ctx.service.device.setPower(String(device_id), power_status);
     if (!updated) {
       ctx.status = 404;
       ctx.body = { ok: false, error: 'Device Not Found' };
       return;
     }
-    ctx.body = { ok: true, data: { id: String(device_id), power_status: !!on } };
+    ctx.body = { ok: true, data: { id: String(device_id), power_status: !!power_status } };
+  }
+
+  // 获取设备状态
+  async getTemperature() {
+    const { ctx } = this;
+    const { device_id } = ctx.request.body || {};
+    const data = await ctx.service.device.getTemperature(device_id);
+    ctx.status = 200;
+    ctx.body = { ok: true, data };
   }
 
   // 对设备进行温度控制
   // PUT /api/devices/temperature  body: { device_id: string, temperature: number }
   async setTemperature() {
     const { ctx } = this;
-    const { device_id, temperature } = ctx.request.body || {};
-    if (!device_id || temperature === undefined) {
+    const { device_id, phase, temperature } = ctx.request.body || {};
+    if (!device_id || phase === undefined || temperature === undefined) {
       ctx.status = 400;
-      ctx.body = { ok: false, error: 'Missing required field: device_id or temperature' };
+      ctx.body = { ok: false, error: 'Missing required field: device_id or phase or temperature' };
       return;
     }
-    const updated = await ctx.service.device.setTemperature(String(device_id), Number(temperature));
+    const updated = await ctx.service.device.setTemperature(
+      String(device_id),
+      phase,
+      Number(temperature)
+    );
     if (!updated) {
       ctx.status = 404;
       ctx.body = { ok: false, error: 'Device Not Found' };
       return;
     }
-    ctx.body = { ok: true, data: { id: String(device_id), temperature } };
+    ctx.status = 200;
+    ctx.body = { ok: true, data: { id: String(device_id), phase, temperature } };
   }
 }
 

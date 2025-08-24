@@ -64,6 +64,17 @@ class DeviceService extends Service {
   }
 
   /**
+   * 获取设备温度
+   * @param {string} device_id 设备ID
+   */
+  async getTemperature(device_id) {
+    const { Temperature } = this.ctx.model;
+    return await Temperature.findOne({
+      where: { device_id },
+    });
+  }
+
+  /**
    * 设备开关机
    * @param {string} id 设备ID
    * @param {boolean} powerOn true=开机, false=关机
@@ -77,13 +88,19 @@ class DeviceService extends Service {
     await device.update({ power_status: !!powerOn });
 
     // 2) 通过 MQTT 下发控制指令
-    const topic = `honeySleepController/device/${id}/set-power`;
+    const topic = `honeySleepController`;
+
     const message = {
-      device_id: id,
-      event_type: OPERATE_TYPE.SetPower,
-      event_data: powerOn ? 'on' : 'off',
-      event_time: Date.now(),
+      // device_id: id,
+      // event_type: OPERATE_TYPE.SetPower,
+      // event_data: powerOn ? 'on' : 'off',
+      // event_time: Date.now(),
+      led: Number(powerOn),
+      gpio38: Number(powerOn),
+      gpio39: Number(powerOn),
+      gpio40: Number(powerOn),
     };
+
     this.app.mqttPublish(topic, message, { qos: 0 });
 
     // 3) 记录日志
@@ -104,18 +121,47 @@ class DeviceService extends Service {
   /**
    * 对设备进行温度控制
    * @param {string} id 设备ID
+   * @param {string} phase 温度阶段
    * @param {number} temperature 目标温度值
    */
-  async setTemperature(id, temperature) {
+  async setTemperature(id, phase, temperature) {
     const { Device, Log } = this.ctx.model;
     const device = await Device.findByPk(id);
     if (!device) return null;
 
-    // 1) 更新数据库状态
-    await device.update({ temperature });
+    // 1) 更新或创建温度记录
+    const phaseMap = {
+      now: 'current_temp',
+      night: 'night_temp',
+      dawn: 'dawn_temp',
+    };
+
+    const columnName = phaseMap[phase];
+    if (!columnName) {
+      throw new Error(`Invalid phase: ${phase}`);
+    }
+
+    // 查找或创建今天的温度记录
+    const [tempRecord] = await this.ctx.model.Temperature.findOrCreate({
+      where: {
+        device_id: device.id,
+      },
+      defaults: {
+        device_id: device.id,
+        timestamp: new Date(),
+        [columnName]: temperature,
+      },
+    });
+
+    // 如果记录已存在，更新对应的温度值
+    if (tempRecord) {
+      await tempRecord.update({
+        [columnName]: temperature,
+      });
+    }
 
     // 2) 通过 MQTT 下发控制指令
-    const topic = `honeySleepController/device/${id}/set-temperature`;
+    const topic = `honeySleepController`;
     const message = {
       device_id: id,
       event_type: OPERATE_TYPE.SetTemperature,

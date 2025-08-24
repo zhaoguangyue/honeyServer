@@ -35,12 +35,20 @@ module.exports = (appInfo) => {
     },
   };
 
-  // 安全配置：对 /api/ 开头的接口关闭 CSRF 校验（便于纯后端 API 调用）
-  config.security = Object.assign({}, config.security, {
-    csrf: Object.assign({ enable: true }, (config.security && config.security.csrf) || {}, {
-      ignore: (ctx) => ctx.path.startsWith('/api/'),
-    }),
-  });
+  // 安全配置：允许跨域访问
+  config.security = {
+    csrf: {
+      enable: false,
+    },
+    domainWhiteList: ['*'],
+  };
+
+  // CORS 配置
+  config.cors = {
+    origin: '*',
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
+    credentials: true,
+  };
 
   // MQTT config (agent maintains connection)
   config.mqtt = {

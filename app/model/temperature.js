@@ -36,7 +36,7 @@ module.exports = (app) => {
         comment: '数据时间戳( 精确到秒 )',
       },
       // 当前温度（MVP 用）
-      current_temp: {
+      now_temp: {
         type: FLOAT,
         allowNull: true,
         comment: '当前水毯温度( ℃ )',

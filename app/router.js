@@ -27,6 +27,7 @@ module.exports = (app) => {
   // 对设备进行开关控制
   router.post('/api/devices/set-power', controller.device.setPower);
   // 对设备进行温度控制
+  router.post('/api/devices/get-temperature', controller.device.getTemperature);
   router.post('/api/devices/set-temperature', controller.device.setTemperature);
 
   // // 传感器指标处理，查询和写入

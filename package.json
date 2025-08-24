@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "egg": "^3.17.5",
+    "egg-cors": "^3.0.1",
     "egg-scripts": "2",
     "egg-sequelize": "^6.0.0",
     "mqtt": "^5.14.0",
