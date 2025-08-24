@@ -131,7 +131,7 @@ class DeviceService extends Service {
 
     // 1) 更新或创建温度记录
     const phaseMap = {
-      now: 'current_temp',
+      now: 'now_temp',
       night: 'night_temp',
       dawn: 'dawn_temp',
     };
