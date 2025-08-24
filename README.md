@@ -103,8 +103,8 @@ app.on('mqtt-message', (data) => {
 登录云服务器
 云服务器密码：honeySleep123
 
-1. 停止pm2
-pm2 stop honeyServer
+1. 直接删了pm2，排除所有可能异常
+pm2 delete honeyServer
 
 2. 项目在/opt下
 使用git pull origin master 拉最新代码
@@ -115,9 +115,9 @@ npm install --production
 4. 运行数据库迁移等前置操作（如果有）
 npm run db:migrate
 
-# 5. 重新启动应用
-pm2 restart egg-app --update-env
+# 5. 启动应用
+pm2 start npm --name "egg-app" -- run start
 
 # 6. 查看应用状态和日志
 pm2 status
-pm2 logs egg-app --lines 100
+pm2 logs honeyServer --lines 100
