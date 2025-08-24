@@ -124,3 +124,6 @@ npm run db:migrate
 
 # 5. 启动应用
 npm run start
+
+
+sqlite3 /var/lib/honey/app.sqlite "SELECT * FROM device;"

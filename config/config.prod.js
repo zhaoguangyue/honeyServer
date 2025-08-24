@@ -8,6 +8,10 @@ module.exports = () => {
       freezeTableName: true,
       timestamps: false,
     },
+    logging: (...args) => {
+      console.log('SQL Query:', ...args);
+      console.log('Stack:', new Error().stack);
+    },
   };
 
   return config;

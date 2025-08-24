@@ -28,7 +28,7 @@ class UserController extends Controller {
     const data = await ctx.service.user.getById(id);
     if (!data) {
       ctx.status = 404;
-      ctx.body = { ok: false, error: 'Not Found' };
+      ctx.body = { ok: false, error: 'Not Found', data };
       return;
     }
     ctx.body = { ok: true, data };
