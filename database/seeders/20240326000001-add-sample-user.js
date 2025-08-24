@@ -9,10 +9,9 @@ module.exports = {
         name: 'honey',
         email: 'honeysleep@honey.com',
         is_active: true,
-        password: 'asdf1234', // 注意：在实际生产环境中，密码应该被加密存储
+        password_hash: 'asdf1234',
         phone: '18888888888',
         created_at: now,
-        updated_at: now,
       },
     ]);
   },

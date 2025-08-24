@@ -37,7 +37,7 @@ npm run db:migrate
 # 回滚最近一次迁移
 npm run db:migrate:undo
 
-# 回滚所有迁移
+# 回滚所有迁移 //先备份否则会清楚全部数据
 npm run db:migrate:undo:all
 
 # 执行所有 seed
@@ -103,4 +103,24 @@ app.on('mqtt-message', (data) => {
 登录云服务器
 云服务器密码：honeySleep123】
 
-不使用PM2，带来额外复杂性，mvp阶段一切从简
+如果服务异常，删除所有
+pm2 delete all
+查找端口
+netstat -tlnp | grep :7001
+杀掉
+kill -9 189072
+
+1. 找到egg进程并杀掉
+pgrep -f 'egg-scripts start' | xargs kill -9
+
+2. 项目在/opt下
+使用git pull origin master 拉最新代码
+
+3. 安装生产依赖（跳过开发依赖）
+npm install
+
+4. 运行数据库迁移等前置操作（如果有）
+npm run db:migrate
+
+# 5. 启动应用
+npm run start
