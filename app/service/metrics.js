@@ -1,5 +1,9 @@
 'use strict';
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
+
 const { Service } = require('egg');
 
 class MetricsService extends Service {
@@ -19,10 +23,43 @@ class MetricsService extends Service {
       this.ctx.logger.info(`处理MQTT消息: [${topic}]`);
       try {
         // 使用 this.ctx 来调用其他服务或模型
-        if (typeof topic === 'string' && topic.startsWith('honeySleepSubscribeSensor')) {
-          const { type, ...payload } = JSON.parse(message);
-          await this.validateModel(type);
-          await this.insertOne(type, payload);
+        const metricsKeys = [
+          {
+            key: 'snore',
+            model: 'snore',
+          },
+          {
+            key: 'heart',
+            model: 'hr',
+          },
+          {
+            key: 'breath',
+            model: 'rr',
+          },
+        ];
+        if (
+          typeof topic === 'string' &&
+          topic.startsWith('honeySleepController') &&
+          !topic.includes('heartbeat')
+        ) {
+          try {
+            const messageObj = JSON.parse(message);
+            const { time, ...restObj } = messageObj;
+            const date = time ? new Date(time) : new Date();
+
+            Object.keys(restObj).forEach(async (key) => {
+              const metric = metricsKeys.find((m) => m.key === key);
+              if (metric) {
+                await this.insertOne(metric.model, {
+                  device_id: 'device-0001',
+                  timestamp: date,
+                  data: messageObj[key],
+                });
+              }
+            });
+          } catch (error) {
+            this.ctx.logger.error('处理MQTT消息失败:', error);
+          }
         }
       } catch (error) {
         this.ctx.logger.error('处理MQTT消息失败:', error);
@@ -58,16 +95,21 @@ class MetricsService extends Service {
    * @param {string} modelName 模型名
    * @param {object} opts { device_id, start, end, limit, order }
    */
+
+  getUtcDate(date) {
+    return dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss');
+  }
+
   async queryMetricsRange(modelName, opts = {}) {
-    const { device_id, /* start, end, */ limit = 5000, order = 'ASC' } = opts;
+    const { device_id, start, end, limit = 5000, order = 'ASC' } = opts;
     const model = this._getModel(modelName);
-    const where = {};
-    if (device_id) where.device_id = device_id;
-    // if (start || end) {
-    //   where.timestamp = {};
-    //   if (start) where.timestamp.$gte = new Date(start);
-    //   if (end) where.timestamp.$lte = new Date(end);
-    // }
+    const where = { device_id };
+
+    if (start || end) {
+      where.timestamp = {
+        [this.app.Sequelize.Op.between]: [this.getUtcDate(start), this.getUtcDate(end)],
+      };
+    }
     return await model.findAll({
       where,
       limit,

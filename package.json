@@ -7,14 +7,15 @@
     "declarations": true
   },
   "dependencies": {
+    "dayjs": "^1.11.13",
     "egg": "^3.17.5",
     "egg-cors": "^3.0.1",
     "egg-scripts": "2",
     "egg-sequelize": "^6.0.0",
     "mqtt": "^5.14.0",
     "sequelize": "^6.37.7",
-    "sqlite3": "^5.1.7",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "egg-bin": "6",

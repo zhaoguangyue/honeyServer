@@ -38,8 +38,8 @@ module.exports = (app) => {
       data: {
         type: INTEGER,
         allowNull: true,
-        validate: { min: 6, max: 39 },
-        comment: '呼吸频率( 次/分钟 ), 范围(5,40)',
+        validate: { min: 0, max: 1000 },
+        comment: '呼吸频率( 次/分钟 ), 范围(0,100)',
       },
     },
     {

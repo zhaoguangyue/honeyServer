@@ -103,16 +103,14 @@ app.on('mqtt-message', (data) => {
 登录云服务器
 云服务器密码：honeySleep123】
 
-如果服务异常，删除所有
-pm2 delete all
+
 查找端口
 netstat -tlnp | grep :7001
 杀掉
 kill -9 189072
 
-1. 找到egg进程并杀掉
-pgrep -f 'egg-scripts start' | xargs kill -9
-
+1. 停掉
+npm run stop
 2. 项目在/opt下
 使用git pull origin master 拉最新代码
 
