@@ -60,7 +60,7 @@ module.exports = (agent) => {
       client.publish(topic, payload, { qos: 0 }, (err) => {
         if (err) agent.coreLogger.error('[mqtt] heartbeat publish error: %s', err && err.message);
       });
-    }, 10000);
+    }, 30000);
     // 不阻止进程退出
     heartbeatTimer.unref && heartbeatTimer.unref();
   };

@@ -1,8 +1,6 @@
 'use strict';
 
 const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
 
 const { Service } = require('egg');
 const { TOPIC } = require('../constant');
@@ -17,6 +15,9 @@ class MetricsService extends Service {
   // 提供一个方法来注册监听器
   async registerHandlers() {
     const { app } = this;
+
+    console.log('--------------------------------', new Date());
+    console.log('--------------------------------', new Date('2025-08-28 00:00:00'));
 
     app.on('mqtt-message', async (data) => {
       const { topic, payload } = data;
@@ -87,31 +88,59 @@ class MetricsService extends Service {
     return await model.bulkCreate(normalized, { validate: true });
   }
 
-  /**
-   * 区间查询（按 device 与时间范围）
-   * @param {string} modelName 模型名
-   * @param {object} opts { device_id, start, end, limit, order }
-   */
-
-  getUtcDate(date) {
-    return dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss');
-  }
-
   async queryMetricsRange(modelName, opts = {}) {
-    const { device_id, start, end, limit = 5000, order = 'ASC' } = opts;
+    const { device_id, start, end } = opts;
     const model = this._getModel(modelName);
     const where = { device_id };
 
-    if (start || end) {
-      where.timestamp = {
-        [this.app.Sequelize.Op.between]: [this.getUtcDate(start), this.getUtcDate(end)],
-      };
-    }
-    return await model.findAll({
+    // 确保有开始和结束时间
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    where.timestamp = {
+      [this.app.Sequelize.Op.between]: [startDate, endDate],
+    };
+
+    const results = await model.findAll({
+      attributes: ['data', 'timestamp'],
       where,
-      limit,
-      order: [['timestamp', order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']],
+      order: [['timestamp', 'ASC']],
     });
+
+    // 将结果按分钟分组
+    const groupedByMinute = {};
+    results.forEach((record) => {
+      const timestamp = dayjs(record.timestamp);
+      const minuteKey = timestamp.format('YYYY-MM-DD HH:mm:00');
+
+      // 只保存每分钟的第一个非零数据
+      if (!groupedByMinute[minuteKey]) {
+        if (record.data !== 0) {
+          groupedByMinute[minuteKey] = record.data;
+        } else {
+          // 如果是0，暂时保存，等待是否有非0数据
+          groupedByMinute[minuteKey] = 0;
+        }
+      } else if (groupedByMinute[minuteKey] === 0 && record.data !== 0) {
+        // 如果之前保存的是0，且当前数据非0，则更新为非0数据
+        groupedByMinute[minuteKey] = record.data;
+      }
+    });
+
+    // 生成完整的24小时数据点（1440个点）
+    const completeData = [];
+    let currentMinute = dayjs(startDate);
+
+    while (currentMinute.isBefore(endDate) || currentMinute.isSame(endDate, 'minute')) {
+      const minuteKey = currentMinute.format('YYYY-MM-DD HH:mm:00');
+      completeData.push({
+        timestamp: minuteKey,
+        data: groupedByMinute[minuteKey] || 0, // 如果没有数据，使用0
+      });
+      currentMinute = currentMinute.add(1, 'minute');
+    }
+
+    return completeData;
   }
 
   _getModel(modelName) {

@@ -65,7 +65,7 @@ class MetricsController extends Controller {
    */
   async queryMetricsRange() {
     const { ctx } = this;
-    const { type, device_id, start, end, limit, order } = ctx.request.body || {};
+    const { type, device_id, start, end } = ctx.request.body || {};
 
     if (!this.validateModel(type)) return;
 
@@ -73,8 +73,6 @@ class MetricsController extends Controller {
       device_id,
       start,
       end,
-      limit: limit ? Number(limit) : undefined,
-      order,
     });
     ctx.body = { ok: true, data };
   }
