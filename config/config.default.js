@@ -54,7 +54,7 @@ module.exports = (appInfo) => {
   config.mqtt = {
     // 写死公共 EMQX Broker, 默认走 TCP 1883
     enabled: true,
-    url: 'mqtts://broker.emqx.io:8883',
+    url: 'mqtts://r7e09133.ala.cn-hangzhou.emqxsl.cn:8883',
     // 备用端点( 手动切换时可参考 )
     endpoints: {
       tcp: 'mqtt://broker.emqx.io:1883',
@@ -63,9 +63,9 @@ module.exports = (appInfo) => {
       wss: 'wss://broker.emqx.io:8084/mqtt',
       // QUIC: mqtt.js 暂不支持, 仅作为端口参考 14567
     },
-    username: process.env.MQTT_USERNAME || undefined,
-    password: process.env.MQTT_PASSWORD || undefined,
-    clientId: process.env.MQTT_CLIENT_ID || undefined,
+    username: 'honey',
+    password: 'honey123',
+    clientId: 'honeyServer',
     clean: process.env.MQTT_CLEAN !== 'false',
     keepalive: process.env.MQTT_KEEPALIVE ? Number(process.env.MQTT_KEEPALIVE) : 60,
     reconnectPeriod: process.env.MQTT_RECONNECT_PERIOD
@@ -76,8 +76,8 @@ module.exports = (appInfo) => {
       : 30 * 1000,
     // 固定订阅的主题( 不受环境变量影响 )
     subscribe: [
-      { topic: 'honeySleepController/#', qos: 0 },
-      { topic: 'honeySleepSubscribeSensor/#', qos: 0 },
+      { topic: 'deviceCommand/#', qos: 0 },
+      { topic: 'reportMetric/#', qos: 0 },
     ],
     options: {
       // set to 'false' to allow self-signed certs when using mqtts

@@ -1,11 +1,8 @@
 'use strict';
 
 const { Service } = require('egg');
-
-const OPERATE_TYPE = {
-  SetPower: 1,
-  SetTemperature: 2,
-};
+const { OPERATE_TYPE, TOPIC } = require('../constant');
+const dayjs = require('dayjs');
 
 class DeviceService extends Service {
   async list(opts = {}) {
@@ -88,17 +85,13 @@ class DeviceService extends Service {
     await device.update({ power_status: !!powerOn });
 
     // 2) 通过 MQTT 下发控制指令
-    const topic = `honeySleepController`;
+    const topic = TOPIC.DeviceCommand;
 
     const message = {
-      // device_id: id,
-      // event_type: OPERATE_TYPE.SetPower,
-      // event_data: powerOn ? 'on' : 'off',
-      // event_time: Date.now(),
-      led: Number(powerOn),
-      gpio38: Number(powerOn),
-      gpio39: Number(powerOn),
-      gpio40: Number(powerOn),
+      device_id: id,
+      event_type: OPERATE_TYPE.SetPower,
+      event_data: powerOn ? 'on' : 'off',
+      event_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     };
 
     this.app.mqttPublish(topic, message, { qos: 0 });
@@ -161,12 +154,12 @@ class DeviceService extends Service {
     }
 
     // 2) 通过 MQTT 下发控制指令
-    const topic = `honeySleepController`;
+    const topic = TOPIC.DeviceCommand;
     const message = {
       device_id: id,
       event_type: OPERATE_TYPE.SetTemperature,
       event_data: temperature,
-      event_time: Date.now(),
+      event_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     };
     this.app.mqttPublish(topic, message, { qos: 0 });
 

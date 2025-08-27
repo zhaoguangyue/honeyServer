@@ -78,9 +78,9 @@ app.on('mqtt-message', (data) => {
 
 1. agent( 根目录 `agent.js` )
    - 仅在 agent 进程建立 MQTT 长连接, 避免多个 worker 重复连接和重复消费；
-   - 固定订阅主题：`honeySleepController/#`( 用于发布 )与 `honeySleepSubscribeSensor/#`( 用于接收 )；
-   - 每 30 秒向 `honeySleepController/heartbeat` 发布心跳消息；
-   - 将收到的任意消息( 特别是 `honeySleepSubscribeSensor/#` )打印, 并通过 `agent.messenger.sendRandom('mqtt-message', data)` 转发给一个 worker；
+   - 固定订阅主题：`deviceCommand/#`( 用于发布 )与 `reportMetric/#`( 用于接收 )；
+   - 每 30 秒向 `deviceCommand/heartbeat` 发布心跳消息；
+   - 将收到的任意消息( 特别是 `reportMetric/#` )打印, 并通过 `agent.messenger.sendRandom('mqtt-message', data)` 转发给一个 worker；
    - 在 `beforeClose` 钩子中清理定时器和断开连接。
 
 2. app( 根目录 `app.js` )
@@ -93,7 +93,7 @@ app.on('mqtt-message', (data) => {
 
 4. 配置( `config/config.default.js` )
    - 写死公共 EMQX Broker 端点( 可按需修改为 TCP/WS/TLS/WSS )；
-   - 固定订阅 `honeySleepController/#` 与 `honeySleepSubscribeSensor/#`；
+   - 固定订阅 `deviceCommand/#` 与 `reportMetric/#`；
    - 可选通过环境变量调整超时、keepalive、重连等参数。
 
 

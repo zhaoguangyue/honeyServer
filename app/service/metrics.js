@@ -5,6 +5,7 @@ const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
 const { Service } = require('egg');
+const { TOPIC } = require('../constant');
 
 class MetricsService extends Service {
   async validateModel(model) {
@@ -37,11 +38,7 @@ class MetricsService extends Service {
             model: 'rr',
           },
         ];
-        if (
-          typeof topic === 'string' &&
-          topic.startsWith('honeySleepController') &&
-          !topic.includes('heartbeat')
-        ) {
+        if (topic === TOPIC.ReportMetric) {
           try {
             const messageObj = JSON.parse(message);
             const { time, ...restObj } = messageObj;

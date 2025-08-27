@@ -7,6 +7,7 @@
  * 4) 提供 app -> agent 的发布通道, 业务侧只需调用 app.mqttPublish 即可。
  */
 const mqtt = require('mqtt');
+const dayjs = require('dayjs');
 
 module.exports = (agent) => {
   // 读取配置：写死的 Broker 地址在 config/config.default.js 内( 可按需切换协议/端口 )
@@ -51,12 +52,15 @@ module.exports = (agent) => {
   const startHeartbeat = () => {
     if (heartbeatTimer) return;
     heartbeatTimer = setInterval(() => {
-      const topic = 'honeySleepController/heartbeat';
-      const payload = JSON.stringify({ ts: Date.now(), pid: process.pid });
+      const topic = 'deviceCommand/heartbeat';
+      const payload = JSON.stringify({
+        time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        payload: 'heartbeat',
+      });
       client.publish(topic, payload, { qos: 0 }, (err) => {
         if (err) agent.coreLogger.error('[mqtt] heartbeat publish error: %s', err && err.message);
       });
-    }, 30000);
+    }, 10000);
     // 不阻止进程退出
     heartbeatTimer.unref && heartbeatTimer.unref();
   };
@@ -140,7 +144,7 @@ module.exports = (agent) => {
   });
 
   // 收到任意已订阅主题消息：
-  // - 传感器前缀 honeySleepSubscribeSensor/# 在 agent 直接打印
+  // - 传感器前缀 reportMetric/# 在 agent 直接打印
   // - 同时通过 messenger 转发给一个随机 worker 进行业务处理
   client.on('message', (topic, payload, packet) => {
     const msg = {
@@ -155,7 +159,7 @@ module.exports = (agent) => {
       },
     };
     // 对传感器订阅前缀的消息在 agent 侧直接打印
-    if (topic && topic.startsWith('honeySleepSubscribeSensor/')) {
+    if (topic && topic.startsWith('reportMetric/')) {
       agent.coreLogger.info('[mqtt] sensor message topic=%s payload=%s', topic, msg.payload);
     }
     // deliver to one random worker to avoid duplicate processing by all workers
