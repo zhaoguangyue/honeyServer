@@ -6,6 +6,7 @@ const OPERATE_TYPE = {
 const TOPIC = {
   DeviceCommand: 'deviceCommand',
   ReportMetric: 'reportMetric',
+  RawData: 'reportMetric/rawdata'
 };
 
 module.exports = {

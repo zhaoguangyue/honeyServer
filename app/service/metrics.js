@@ -7,7 +7,7 @@ const { TOPIC } = require('../constant');
 
 class MetricsService extends Service {
   async validateModel(model) {
-    const validModels = ['hr', 'rr', 'temperature', 'snore', 'motion'];
+    const validModels = ['hr', 'rr', 'temperature', 'snore', 'motion', 'metric'];
     if (!validModels.includes(model)) {
       throw new Error(`Invalid model: ${model}`);
     }
@@ -58,6 +58,37 @@ class MetricsService extends Service {
           } catch (error) {
             this.ctx.logger.error('处理MQTT消息失败:', error);
           }
+        } else if(topic === TOPIC.RawData) {
+          try {
+            // 解析MQTT发送过来的JSON字符串
+            const messageObj = JSON.parse(message);
+            const { time, data } = messageObj;
+            
+            // 验证数据格式
+            if (!time || !data) {
+              this.ctx.logger.error('RawData消息格式错误: 缺少time或data字段');
+              return;
+            }
+            
+            // 解析时间戳
+            const timestamp = new Date(time);
+            if (isNaN(timestamp.getTime())) {
+              this.ctx.logger.error('RawData时间格式错误:', time);
+              return;
+            }
+            
+            // 存储到metric表
+            await this.insertOne('metric', {
+              device_id: 'device-0001', // 默认设备ID，可根据实际需求调整
+              timestamp: timestamp,
+              raw_data: data,
+            });
+            
+            this.ctx.logger.info(`RawData数据已存储: 时间=${time}`);
+            
+          } catch (error) {
+            this.ctx.logger.error('处理RawData消息失败:', error);
+          }
         }
       } catch (error) {
         this.ctx.logger.error('处理MQTT消息失败:', error);
@@ -67,9 +98,9 @@ class MetricsService extends Service {
 
   /**
    * 通用写入（单条）
-   * @param {string} modelName hr|rr|temperature|snore|motion
+   * @param {string} modelName hr|rr|temperature|snore|motion|metric
    * @param {object} payload { device_id, timestamp, value }
-   *  - 对应字段名：hr/rr/snore/motion -> data; temperature -> body_temp
+   *  - 对应字段名：hr/rr/snore/motion -> data; temperature -> body_temp; metric -> raw_data
    */
   async insertOne(modelName, payload) {
     const model = this._getModel(modelName);
@@ -177,6 +208,15 @@ class MetricsService extends Service {
           throw new Error('current_temp is required');
         }
         return { ...base, current_temp: payload.current_temp };
+      case 'metric':
+        if (payload.raw_data == null) {
+          throw new Error('raw_data is required');
+        }
+        return { 
+          ...base, 
+          raw_data: payload.raw_data,
+          created_at: new Date()
+        };
       default:
         throw new Error(`unsupported model: ${modelName}`);
     }
