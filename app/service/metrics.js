@@ -80,7 +80,7 @@ class MetricsService extends Service {
             // 存储到metric表
             await this.insertOne('metric', {
               device_id: 'device-0001', // 默认设备ID，可根据实际需求调整
-              timestamp: timestamp,
+              timestamp,
               raw_data: data,
             });
             

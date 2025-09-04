@@ -125,3 +125,6 @@ npm run start
 
 
 sqlite3 /var/lib/honey/app.sqlite "SELECT * FROM device;"
+
+
+9。4日，新增支持metric表，数据格式为 {time:'2025-01-01 12:12:12', data: '12 12 23 32 45'}
